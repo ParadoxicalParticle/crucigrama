@@ -1,75 +1,31 @@
-import { useContext, useEffect, useState } from 'react'
-import './styles/main.css'
+import { useContext } from 'react';
+import { AppContext } from './AppProvider.jsx';
+import Navbar from './components/Navbar.jsx';
+import Footer from './components/Footer.jsx';
+import GameContainer from './components/GameContainer.jsx';
+import PersonalisedPuzzleContainer from './components/PersonalisedPuzzleContainer.jsx';
+import ColorConfiguration from './components/ColorConfiguration.jsx';
 
-import Navbar from './components/Navbar.jsx'
-import PuzzleFormContainer from './components/PuzzleFormContainer.jsx'
-import PersonalisedPuzzleContainer from './components/PersonalisedPuzzleContainer.jsx'
-import Footer from './components/Footer.jsx'
-import CrosswordContainer from './components/CrosswordContainer.jsx'
-import ColorConfiguration from './components/ColorConfiguration.jsx'
-import { AppContext } from './AppProvider.jsx'
-
-
-// Main App component that renders the entire application.
-// It includes the Navbar, main container with crossword progress, crossword puzzle, puzzle form, references, personalized puzzle container, footer, and color configuration.
 function App() {
-  const { refs, answers, setShowAnswers } = useContext(AppContext)
-  const [crossword, setCrossword] = useState(0) // State to restart the crossword puzzle
+  const { setShowAnswers, colors } = useContext(AppContext);
 
   const restartCrossword = () => {
-    setShowAnswers(false) // Hide answers when restarting
-    setCrossword(crossword + 1) // Increment to trigger a re-render
-  }
+    setShowAnswers(false);
+  };
 
+  // The 'style={colors}' prop here applies the CSS variables globally
   return (
-    <>
-      {/* Navigation Bar */}
+    <div className="min-h-screen flex flex-col" style={colors}>
       <Navbar />
-
-      <div className="container-fluid" id="mainContainer">
-        <div className="crossword-container d-flex flex-column">
-          <div className="d-flex justify-content-center">
-            <h2>Crossword Completion Progress</h2>
-          </div>
-          <div className="h-100 d-flex align-items-center justify-content-center">
-            <div className="progress" style={{ width: '60%' }}>
-              <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                aria-label="Animated striped example" style={{ width: '0%' }} aria-valuenow="21" aria-valuemin="0"
-                aria-valuemax="35"></div>
-            </div>
-          </div>
-        </div>
-
-
-        <div className="m-2"></div>
-
-        {/* Crossword */}
-        <CrosswordContainer key={crossword} />
-
-        <PuzzleFormContainer restartCrossword={restartCrossword} />
-
-        <br />
-        <div className="container-sm" id="references">
-          <h3 data-i18n="references_title">Referencias</h3>
-
-          <ul>
-            {refs.map((s, i) => {
-              return <li key={i}>{s}</li>
-            })}
-          </ul>
-        </div>
-
-        <br />
-        {/* Personalized Crossword Container */}
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <GameContainer restartCrossword={restartCrossword} />
+        <div className="my-12 border-t border-gray-700"></div>
         <PersonalisedPuzzleContainer />
-      </div >
-
-      {/* Footer */}
-      < Footer />
-
+      </main>
+      <Footer />
       <ColorConfiguration />
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
