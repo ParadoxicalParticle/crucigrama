@@ -1,137 +1,135 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { AppContext } from '../AppProvider';
 import { stopTimerHandler } from '../scripts/timer-crossword';
 
-// DrawCrossword component renders the crossword puzzle form.
+// Exported for printing
 export const DrawCrossword = ({ showAnswers, handleKeyDown, inputRefs }) => {
-    const { vword, answers, colors, refs, timerRef, setTimerRef } = useContext(AppContext)
-    const [inputAns, setInputAns] = useState(answers.map((rowWord) => Array(rowWord.length).fill('')))
-    const [isCorrect, setIsCorrect] = useState(Array(answers.length).fill(false))
+  const { vword, answers, timerRef, setTimerRef } = useContext(AppContext);
 
+  if (!answers || answers.length === 0 || !vword) {
+    return <div className="p-4">Loading puzzle...</div>;
+  }
 
-    // Finds the maximum initial position of the vertical word in the answers.
-    const findMaxInit = () => {
-        let init = 0;
-        for (let i = 0; i < answers.length; i++) {
-            init = Math.max(init, answers[i].toLowerCase().indexOf(vword[i].toLowerCase()));
+  const [inputAns, setInputAns] = useState(() => answers.map(row => Array(row.length).fill('')));
+  const [isCorrect, setIsCorrect] = useState(() => Array(answers.length).fill(false));
+
+  const findMaxInit = () => answers.reduce((max, word, i) => Math.max(max, word.toLowerCase().indexOf(vword[i].toLowerCase())), 0);
+  const maxInitPosition = findMaxInit();
+
+  const handleInputChange = (e, rowIdx, cellIdx) => {
+    const newValue = e.target.value.toUpperCase();
+    if (newValue.length > 1) return; // Prevent pasting multiple characters
+
+    const newAnswers = [...inputAns];
+    newAnswers[rowIdx][cellIdx] = newValue;
+    setInputAns(newAnswers);
+    validateWord(rowIdx, newAnswers[rowIdx].join(''), answers[rowIdx]);
+
+    // NEW: Auto-advance to the next cell in the word
+    if (newValue && inputRefs.current) {
+        const rowWord = answers[rowIdx];
+        const charIndex = rowWord.toLowerCase().indexOf(vword[rowIdx].toLowerCase());
+        const currInitPosition = maxInitPosition - charIndex;
+        const currentGridCol = currInitPosition + cellIdx;
+
+        const nextInput = inputRefs.current[rowIdx][currentGridCol + 1];
+
+        if (nextInput && !nextInput.disabled) {
+            nextInput.focus();
         }
-        return init;
     }
+  };
 
-    let maxInitPosition = findMaxInit();
+  const validateWord = (i, word1, word2) => {
+    const newIsCorrect = [...isCorrect];
+    newIsCorrect[i] = word1.toLowerCase() === word2.toLowerCase();
+    setIsCorrect(newIsCorrect);
+  };
 
-    // Handles the change event for the input elements.
-    const handleInputChange = (e, i, j) => {
-        const newValue = e.target.value.toUpperCase();
-        const newAnswers = [...inputAns];
-        newAnswers[i][j] = newValue;
-        setInputAns(newAnswers);
-        validateWord(i, newAnswers[i].join(''), answers[i]);
-    };
-
-    // Validates if the input word matches the correct answer.
-    const validateWord = (i, word1, word2) => {
-        const newIsCorrect = [...isCorrect]
-        newIsCorrect[i] = (word1.toLowerCase() == word2.toLowerCase());
-        setIsCorrect(newIsCorrect);
+  useEffect(() => {
+    if (isCorrect.every(value => value === true)) {
+      stopTimerHandler(timerRef, setTimerRef);
+      alert("Congrats! You finished the crossword.");
     }
+  }, [isCorrect, timerRef, setTimerRef]);
+  
+  useEffect(() => {
+    setIsCorrect(Array(answers.length).fill(false));
+    const newInputAns = answers.map((rowWord, i) => {
+        let charIndex = rowWord.toLowerCase().indexOf(vword[i].toLowerCase());
+        let newRow = Array(rowWord.length).fill('');
+        if (charIndex >= 0) newRow[charIndex] = rowWord[charIndex].toUpperCase();
+        return newRow;
+    });
+    setInputAns(newInputAns);
+  }, [answers, vword]);
 
-    // To be executed when the crossword is completed.
-    // Stops the timer and displays a congratulatory alert.
-    useEffect(() => {
-        if (isCorrect.every(value => value === true)) {
-            stopTimerHandler(timerRef, setTimerRef);
-            alert("Congrats! You finished the crossword.");
+  return (
+    <div className='puzzle-form' style={{ display: 'grid', gap: '4px', gridTemplateRows: `repeat(${answers.length}, 1fr)` }}>
+      {answers.map((rowWord, i) => {
+        try {
+          const charIndex = rowWord.toLowerCase().indexOf(vword[i].toLowerCase());
+          const currInitPosition = maxInitPosition - charIndex;
+
+          return Array(rowWord.length).fill(0).map((_, j) => {
+            const isDisabled = j === charIndex;
+            const isWordCorrect = isCorrect[i];
+
+            // UPDATED: Classes now use CSS variables from the color context
+            const baseClasses = "w-10 h-10 md:w-12 md:h-12 text-center uppercase font-bold text-lg rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white";
+            const enabledClasses = "bg-[var(--e)] border border-[var(--d)] hover:bg-[var(--f)]";
+            const disabledClasses = "bg-[var(--c)] border-[var(--d)] cursor-not-allowed";
+            const correctClasses = "bg-[var(--f)] border-[var(--d)]";
+            
+            const cellClasses = `${baseClasses} ${isDisabled ? disabledClasses : isWordCorrect ? correctClasses : enabledClasses}`;
+
+            return (
+              <input
+                key={`${i}-${j}`}
+                className={cellClasses}
+                style={{ gridRow: i + 1, gridColumn: currInitPosition + j + 1 }}
+                value={showAnswers || isDisabled ? rowWord[j].toUpperCase() : (inputAns[i]?.[j] || '')}
+                onChange={(e) => handleInputChange(e, i, j)}
+                disabled={isDisabled}
+                maxLength={1}
+                ref={el => { if (inputRefs) inputRefs.current[i][currInitPosition + j] = el; }}
+                onKeyDown={(e) => { if (handleKeyDown) handleKeyDown(e, i, currInitPosition + j); }}
+              />
+            );
+          });
+        } catch (error) {
+          console.error(`Error rendering row ${i}:`, error);
+          return null;
         }
-    }, [isCorrect])
+      })}
+    </div>
+  );
+};
 
-    // Resets the isCorrect state when answers change.
-    useEffect(() => {
-        setIsCorrect(Array(answers.length).fill(false));
-    }, [answers]);
-
-
-    // Initializes input answers based on vertical word and letters' position in each answer.
-    useEffect(() => {
-        // console.log(vword, answers, refs)
-        const newInputAns = answers.map((rowWord, i) => {
-            let charIndex = rowWord.toLowerCase().indexOf(vword[i].toLowerCase());
-            let newRow = Array(rowWord.length).fill('');
-            if (charIndex >= 0) {
-                newRow[charIndex] = rowWord[charIndex].toUpperCase();
-            }
-            return newRow;
-        })
-        setInputAns(newInputAns);
-    }, [answers, vword]);
-
-    return (<form className='puzzle-form' style={{ gridTemplateRows: `repeat(${answers.length}, 1fr)` }}>
-        {answers.map((rowWord, i) => {
-            try {
-                let charIndex = rowWord.toLowerCase().indexOf(vword[i].toLowerCase())
-
-                // initial position where the words start to be written in the horizontal row
-                let currInitPosition = maxInitPosition - charIndex;
-
-                // rendering a row (i.e. a horizontal word)
-                // j iterator for horizontal words
-                return (
-                    Array(rowWord.length).fill(0).map((_, j) => {
-                        let correctValue = rowWord[j];
-                        let defaultValue = inputAns[i] ? inputAns[i][j] : '';
-
-                        // input cell of the puzzle form grid (where letter is entered)
-                        return (<input
-                            key={`${i}-${j}`}
-                            className={'puzzle-cell ' + (isCorrect[i] ? 'correct-answer' : '')}
-                            style={{ gridRow: i + 1, gridColumn: currInitPosition + j + 1, ...colors }}
-                            value={showAnswers || (j == charIndex) ? correctValue : defaultValue}
-                            onChange={(e) => handleInputChange(e, i, j)}
-                            disabled={j == charIndex}
-                            maxLength={1}
-                            ref={el => { inputRefs ? inputRefs.current[i][currInitPosition + j] = el : '' }}
-                            onKeyDown={(e) => { handleKeyDown ? handleKeyDown(e, i, currInitPosition + j) : '' }}
-                        />)
-                    })
-                )
-            } catch (error) {
-                console.error(`Error rendering row ${i}:`, error);
-                return null; // Return null if there's an error in rendering the row
-            }
-        })}
-    </form>)
-}
-
-// CrosswordContainer component renders the crossword puzzle container.
 const CrosswordContainer = () => {
-    const { showAnswers, vword, answers } = useContext(AppContext)
-    const inputRefs = useRef(answers.map((_, i) => Array(36).fill(null)));
+  const { answers } = useContext(AppContext);
+  const inputRefs = useRef(answers.map(() => Array(36).fill(null)));
 
-    // handles keyboard navigation within the crossword puzzle using arrow keys.
-    const handleKeyDown = (e, i, j) => {
-        if (e.key === 'ArrowUp' && inputRefs.current[i - 1] && inputRefs.current[i - 1][j]) {
-            inputRefs.current[i - 1][j].focus();
-        }
-        else if (e.key === 'ArrowDown' && inputRefs.current[i + 1] && inputRefs.current[i + 1][j]) {
-            inputRefs.current[i + 1][j].focus();
-        }
-        else if (e.key === 'ArrowLeft' && inputRefs.current[i][j - 1]) {
-            inputRefs.current[i][j - 1].focus();
-        }
-        else if (e.key === 'ArrowRight' && inputRefs.current[i][j + 1]) {
-            inputRefs.current[i][j + 1].focus();
-        }
-    };
+  const handleKeyDown = (e, i, j) => {
+    const key = e.key;
+    let nextFocus = null;
 
-    return (
-        <div className="container-md actual" id="cpuzzle">
-            <DrawCrossword
-                showAnswers={showAnswers}
-                handleKeyDown={handleKeyDown}
-                inputRefs={inputRefs}
-            />
-        </div>
-    )
-}
+    if (key === 'ArrowUp' && i > 0) nextFocus = inputRefs.current[i - 1][j];
+    else if (key === 'ArrowDown' && i < answers.length - 1) nextFocus = inputRefs.current[i + 1][j];
+    else if (key === 'ArrowLeft' && j > 0) nextFocus = inputRefs.current[i][j - 1];
+    else if (key === 'ArrowRight') nextFocus = inputRefs.current[i][j + 1];
 
-export default CrosswordContainer
+    if (nextFocus && !nextFocus.disabled) {
+      e.preventDefault();
+      nextFocus.focus();
+    }
+  };
+
+  return (
+    <div className="p-4 bg-gray-800 rounded-lg shadow-lg inline-block">
+      <DrawCrossword showAnswers={false} handleKeyDown={handleKeyDown} inputRefs={inputRefs} />
+    </div>
+  );
+};
+
+export default CrosswordContainer;
