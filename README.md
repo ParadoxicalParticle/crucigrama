@@ -16,11 +16,11 @@
 
 Escribir la palabra que se deberá mostrar de forma vertical y, a continuación, hacer clic en el botón **🚀¡Vamos!**
 
-![image](https://github.com/user-attachments/assets/98f0cb78-671c-40be-9a90-c68a7f5fdb4d)
+![Generate crossword](assets/readme/generator.png)
 
 Se van a desplegar dos cuadros de texto por cada letra de la palabra:
 
-![image](https://github.com/user-attachments/assets/3caaa2f5-36b9-478e-be74-3a785afb53c3)
+![Generate crossword](assets/readme/inputs.png)
 
 - A la _izquierda_, vamos a ingresar cuál es la _palabra_ que debemos adivinar (la respuesta).
 - A la _derecha_, vamos a ingresar la _descripción_, que funcionará como pista.
@@ -33,7 +33,6 @@ Con esta herramienta podremos cargar la estructura deseada para armar nuestro pr
 
 Accede a la herramienta [haciendo clic aquí](https://m0nt4ld0.github.io/crucigrama/).
 
-![image](https://github.com/user-attachments/assets/d6b948e3-97ff-4738-8f10-0515ac57b297)
 
 El JSON a insertar debe contener el siguiente formato:
 
@@ -66,15 +65,16 @@ A continuación, se presenta un ejemplo:
 ```
 Este JSON dará lugar al siguiente crucigrama:
 
-![image](https://github.com/user-attachments/assets/c9478e37-1f0a-4a0e-9260-5c45e713d6e3)
+![image](assets/readme/play-puzzle.png)
 
 ### **Imprimir el crucigrama** 🖨️
 
 Una vez cargado el crucigrama personalizado, podremos imprimirlo haciendo clic en el botón correspondiente. Nos va a abrir una nueva página en blanco, con el crucigrama para completarlo y sus referencias. Podemos imprimirlo, o guardarlo en nuestro equipo como un documento PDF.
 
 Clic en el botón **Imprimir**
-![image](https://github.com/user-attachments/assets/e7f20174-c0e0-4fe5-b842-3612a6768fd7)
+
+![image](assets/readme/print.png)
 
 Se abre la siguiente página, para la impresión. En el cuadro de selección de la derecha podemos alternar entre imprimirlo (con nuestra impresora instalada y configurada) o guardarlo como PDF.
 
-![image](https://github.com/user-attachments/assets/12a88238-b609-42be-a203-69f1f96f4de0)
+

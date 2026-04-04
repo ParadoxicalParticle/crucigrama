@@ -14,11 +14,11 @@
 
 Écrivez le mot qui doit être affiché verticalement, puis cliquez sur le bouton **🚀Allons-y !**
 
-![image](https://github.com/user-attachments/assets/98f0cb78-671c-40be-9a90-c68a7f5fdb4d)
+![Generate crossword](assets/readme/generator.png)
 
 Deux champs de texte seront affichés pour chaque lettre du mot :
 
-![image](https://github.com/user-attachments/assets/3caaa2f5-36b9-478e-be74-3a785afb53c3)
+![Generate crossword](assets/readme/inputs.png)
 
 - À gauche, saisissez le _mot à deviner_ (la réponse).
 - À droite, saisissez la _description_, qui servira d'indice.
@@ -31,7 +31,6 @@ Avec cet outil, vous pouvez charger la structure souhaitée pour créer votre pr
 
 Accédez à l'outil [en cliquant ici](https://m0nt4ld0.github.io/crucigrama/).
 
-![image](https://github.com/user-attachments/assets/d6b948e3-97ff-4738-8f10-0515ac57b297)
 
 Le JSON doit avoir le format suivant :
 
@@ -65,14 +64,14 @@ Voici un exemple :
 
 Ce JSON génèrera le mot croisé suivant :
 
-![image](https://github.com/user-attachments/assets/c9478e37-1f0a-4a0e-9260-5c45e713d6e3)
+![image](assets/readme/play-puzzle.png)
 
 ### **Imprimer le mot croisé** 🖨️
 Une fois le mot croisé personnalisé chargé, vous pouvez l'imprimer en cliquant sur le bouton correspondant. Une nouvelle page blanche s'ouvrira, avec le mot croisé à compléter et ses indices. Vous pouvez l'imprimer ou l'enregistrer au format PDF.
 
 Cliquez sur le bouton **Imprimer**
-![image](https://github.com/user-attachments/assets/e7f20174-c0e0-4fe5-b842-3612a6768fd7)
+
+![image](assets/readme/print.png)
 
 La page suivante s'ouvrira pour l'impression. Dans le menu à droite, vous pouvez choisir entre l'imprimer (avec votre imprimante installée) ou l'enregistrer au format PDF.
 
-![image](https://github.com/user-attachments/assets/12a88238-b609-42be-a203-69f1f96f4de0)
